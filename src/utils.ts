@@ -3,7 +3,7 @@ import path from 'path';
 import semver from 'semver';
 import yaml from 'yaml';
 
-import type { PackageInfo } from './types';
+import type { PackageInfo } from './types.js';
 
 export function getDisplayVersion(pkg: PackageInfo): string | undefined {
   if (pkg.targetVersionType === 'patch') {

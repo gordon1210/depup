@@ -2,7 +2,7 @@ import { Box, Text } from 'ink';
 import path from 'path';
 import React, { Fragment } from 'react';
 
-import type { PackageGroup } from '../types';
+import type { PackageGroup } from '../types.js';
 
 interface SideNavProps {
   groups: PackageGroup[];

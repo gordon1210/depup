@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import semver from 'semver';
 
-import type { PackageGroup, PackageInfo } from '../types';
-import { getDisplayVersion } from '../utils';
+import type { PackageGroup, PackageInfo } from '../types.js';
+import { getDisplayVersion } from '../utils.js';
 
 export function usePackageController(packages: PackageInfo[]) {
   const [cursor, setCursor] = useState(0);

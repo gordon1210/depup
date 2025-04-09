@@ -2,7 +2,7 @@ import { Box, Text } from 'ink';
 import path from 'path';
 import React from 'react';
 
-import type { PackageInfo } from '../types';
+import type { PackageInfo } from '../types.js';
 
 interface PackageRowProps {
   pkg: PackageInfo;

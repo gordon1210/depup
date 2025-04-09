@@ -2,9 +2,9 @@ import { Box, Text } from 'ink';
 import path from 'path';
 import React from 'react';
 
-import type { PackageInfo } from '../types';
-import { progressBar } from '../utils';
-import { PackageRow } from './PackageRow';
+import type { PackageInfo } from '../types.js';
+import { progressBar } from '../utils.js';
+import { PackageRow } from './PackageRow.js';
 
 interface PackageListProps {
   packages: PackageInfo[];
@@ -70,7 +70,7 @@ export function PackageList({
             isSelected={absoluteIndex === cursor}
             isDiverging={isDiverging}
             isVersionUnchanged={unchanged}
-            hasStrategyChanged={strategyChanged}
+            hasStrategyChanged={Boolean(strategyChanged)}
           />
         );
       })}

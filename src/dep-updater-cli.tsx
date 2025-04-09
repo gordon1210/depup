@@ -1,10 +1,10 @@
 import { Box, render, Text, useApp, useInput } from 'ink';
 import React from 'react';
 
-import { PackageList } from '@/components/PackageList';
-import { SideNav } from './components/SideNav';
-import { usePackageController } from './hooks/usePackageController';
-import { usePackageData } from './hooks/usePackageData';
+import { PackageList } from './components/PackageList.js';
+import { SideNav } from './components/SideNav.js';
+import { usePackageController } from './hooks/usePackageController.js';
+import { usePackageData } from './hooks/usePackageData.js';
 
 const VISIBLE_ROWS = 20;
 

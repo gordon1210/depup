@@ -7,8 +7,8 @@ import path from 'path';
 import { useEffect, useState } from 'react';
 import semver from 'semver';
 
-import type { PackageInfo } from '../types';
-import { detectWorkspaces, getDisplayVersion } from '../utils';
+import type { PackageInfo } from '../types.js';
+import { detectWorkspaces, getDisplayVersion } from '../utils.js';
 
 export function usePackageData() {
   const [packages, setPackages] = useState<PackageInfo[]>([]);
