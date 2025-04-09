@@ -85,15 +85,33 @@ const App = () => {
     return <Text>📦 Installing selected dependencies...</Text>;
   }
   if (isConfirming) {
+    // Group packages by directory for a cleaner confirmation view
+    const packagesByDir = packagesToUpdate.reduce((acc, pkg) => {
+      const dir = path.relative(process.cwd(), pkg.packagePath) || ".";
+      if (!acc[dir]) acc[dir] = [];
+      acc[dir].push(pkg);
+      return acc;
+    }, {} as Record<string, typeof packagesToUpdate>);
+    
     return (
       <Box flexDirection="column">
         <Text bold>The following dependencies will be updated:</Text>
-        {packagesToUpdate.map((pkg) => (
-          <Text key={`${pkg.packagePath}-${pkg.name}`}>
-            • {pkg.name} in {path.relative(process.cwd(), pkg.packagePath) || "."}: {pkg.currentVersion} → {pkg.displayVersion}
-          </Text>
+        
+        {Object.entries(packagesByDir).map(([dir, pkgs]) => (
+          <Box key={dir} flexDirection="column" marginTop={1}>
+            <Text bold underline>{dir}/package.json</Text>
+            {pkgs.map((pkg) => (
+              <Text key={`${dir}-${pkg.name}`}>
+                • {pkg.name}: {pkg.currentVersion} → {pkg.displayVersion}
+              </Text>
+            ))}
+          </Box>
         ))}
-        <Text marginTop={1}>Press Enter to confirm or q to cancel</Text>
+        
+        <Text marginTop={1}>
+          This will update package.json files and run a single 'pnpm install' at the end.
+        </Text>
+        <Text bold marginTop={1}>Press Enter to confirm or q to cancel</Text>
       </Box>
     );
   }

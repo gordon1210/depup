@@ -18,3 +18,16 @@ export interface PackageGroup {
   path: string;
   packages: PackageInfo[];
 }
+
+export interface PackageChange {
+  name: string;
+  currentVersion: string;
+  newVersion: string;
+  displayVersion: string;
+}
+
+export interface PackageJsonUpdate {
+  path: string;
+  directory: string;
+  changes: PackageChange[];
+}

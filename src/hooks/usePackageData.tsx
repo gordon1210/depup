@@ -7,7 +7,7 @@ import path from "path";
 import { useEffect, useState } from "react";
 import semver from "semver";
 
-import type { PackageInfo } from "../types.js";
+import type { PackageInfo, PackageJsonUpdate } from "../types.js";
 import { detectWorkspaces, getDisplayVersion } from "../utils.js";
 
 export function usePackageData() {
@@ -108,7 +108,10 @@ export function usePackageData() {
     return version;
   };
 
-  const updateDependencies = (toUpdate: PackageInfo[]) => {
+  const updateDependencies = async (toUpdate: PackageInfo[]): Promise<void> => {
+    const updates: Map<string, PackageJsonUpdate> = new Map();
+
+    // First pass: collect all updates to make
     for (const pkg of toUpdate) {
       const relPath = path.relative(process.cwd(), pkg.packagePath);
       const displayVersion = getDisplayVersion(pkg);
@@ -147,15 +150,74 @@ export function usePackageData() {
         continue;
       }
 
-      console.log(
-        `\nUpdating ${pkg.name} in ${relPath || "."} to ${displayVersion}`,
-      );
+      // Save this update for the specific package.json file
+      if (!updates.has(pkg.packageJsonPath)) {
+        updates.set(pkg.packageJsonPath, {
+          path: pkg.packageJsonPath,
+          directory: pkg.packagePath,
+          changes: [],
+        });
+      }
 
-      execSync(
-        `pnpm --filter ./${relPath || "."} add ${pkg.name}@${installVersion}`,
-        { stdio: "inherit" },
-      );
+      // Add this package to the list of updates for this package.json
+      updates.get(pkg.packageJsonPath)?.changes.push({
+        name: pkg.name,
+        currentVersion: pkg.currentVersion,
+        newVersion: installVersion,
+        displayVersion: displayVersion,
+      });
     }
+
+    // If there are no valid updates, return early
+    if (updates.size === 0) {
+      console.log("No updates to apply.");
+      return;
+    }
+
+    // Now apply all updates at once
+    for (const update of updates.values()) {
+      try {
+        // Read the package.json file
+        const packageJsonContent = JSON.parse(
+          await fs.readFile(update.path, "utf8"),
+        );
+
+        // Apply all changes to this package.json
+        let didModify = false;
+        for (const change of update.changes) {
+          const relPath = path.relative(process.cwd(), update.directory);
+          console.log(
+            `\nUpdating ${change.name} in ${relPath || "."} to ${change.displayVersion}`,
+          );
+
+          // Update in dependencies or devDependencies as appropriate
+          if (packageJsonContent.dependencies?.[change.name]) {
+            packageJsonContent.dependencies[change.name] = change.newVersion;
+            didModify = true;
+          }
+          if (packageJsonContent.devDependencies?.[change.name]) {
+            packageJsonContent.devDependencies[change.name] = change.newVersion;
+            didModify = true;
+          }
+        }
+
+        if (didModify) {
+          // Write the updated package.json back to disk
+          await fs.writeFile(
+            update.path,
+            JSON.stringify(packageJsonContent, null, 2) + "\n",
+            "utf8",
+          );
+        }
+      } catch (error) {
+        console.error(`Error updating ${update.path}:`, error);
+      }
+    }
+
+    // Run a single pnpm install command at the end
+    console.log("\nRunning pnpm install to update all dependencies...");
+    execSync("pnpm install", { stdio: "inherit" });
+    console.log("\nDependencies updated successfully!");
   };
 
   return { packages, loading, error, updatePackages, updateDependencies };
