@@ -63,15 +63,67 @@ export function usePackageData() {
     setPackages(updatedPackages);
   };
 
+  // Helper function to get clean version without prefixes for installation
+  const getInstallVersion = (pkg: PackageInfo): string | undefined => {
+    // First try the selected version type
+    let version: string | undefined;
+    
+    switch(pkg.targetVersionType) {
+      case 'patch':
+        version = pkg.patchVersion;
+        break;
+      case 'minor':
+        version = pkg.minorVersion;
+        break;
+      case 'latest':
+        version = !semver.prerelease(pkg.latestVersion) 
+          ? pkg.latestVersion 
+          : undefined;
+        break;
+      case 'prerelease':
+        version = pkg.prereleaseVersion;
+        break;
+    }
+    
+    // If the selected version type doesn't have a value, implement a fallback strategy
+    if (!version) {
+      // Try in order: patch -> minor -> latest -> prerelease
+      version = pkg.patchVersion || 
+                pkg.minorVersion || 
+                (!semver.prerelease(pkg.latestVersion) ? pkg.latestVersion : undefined) || 
+                pkg.prereleaseVersion;
+      
+      // If we found a fallback version, log it
+      if (version) {
+        console.warn(
+          `No ${pkg.targetVersionType} version available for ${pkg.name}. ` +
+          `Falling back to ${version}.`
+        );
+      }
+    }
+    
+    return version;
+  };
+
   const updateDependencies = (toUpdate: PackageInfo[]) => {
     for (const pkg of toUpdate) {
       const relPath = path.relative(process.cwd(), pkg.packagePath);
-      const versionSpec = getDisplayVersion(pkg);
+      const displayVersion = getDisplayVersion(pkg);
+      const installVersion = getInstallVersion(pkg);
+      
+      if (!installVersion) {
+        console.warn(
+          `Skipping ${pkg.name}: Unable to determine installation version.`
+        );
+        continue; // Skip this package if we don't have a valid version
+      }
+      
       console.log(
-        `\nUpdating ${pkg.name} in ${relPath || '.'} to ${versionSpec}`
+        `\nUpdating ${pkg.name} in ${relPath || '.'} to ${displayVersion}`
       );
+      
       execSync(
-        `pnpm --filter ./${relPath || '.'} add ${pkg.name}@${versionSpec}`,
+        `pnpm --filter ./${relPath || '.'} add ${pkg.name}@${installVersion}`,
         { stdio: 'inherit' }
       );
     }
