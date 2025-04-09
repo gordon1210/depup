@@ -1,15 +1,18 @@
 {
   "name": "@gordon1210/depup",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "a dependency upgrade tool for node projects",
   "keywords": ["dependency", "upgrade", "npm", "package", "update", "manager"],
   "license": "MIT",
   "author": "gordon1210",
   "repository": {
-    "url": "https://github.com/gordon1210/depup",
-    "type": "git"
+    "type": "git",
+    "url": "git+https://github.com/gordon1210/depup.git"
   },
-  "branch": "main",
+  "bugs": {
+    "url": "https://github.com/gordon1210/depup/issues"
+  },
+  "homepage": "https://github.com/gordon1210/depup#readme",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
