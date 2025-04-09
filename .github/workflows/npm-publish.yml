@@ -52,6 +52,14 @@ jobs:
       - name: Build project
         run: pnpm build
 
+      - name: Reset uncommitted changes after build (release only)
+        if: github.event_name == 'release'
+        run: git reset --hard
+
+      - name: Fake branch if detached HEAD (release only)
+        if: github.event_name == 'release'
+        run: git symbolic-ref HEAD refs/heads/main
+
       - name: Final Git cleanup to satisfy pnpm (workflow_dispatch only)
         if: github.event_name == 'workflow_dispatch'
         run: |
@@ -60,10 +68,6 @@ jobs:
           git add -A
           git diff-index --quiet HEAD || git commit -m "Final cleanup before publish [skip ci]"
           git push
-
-      - name: Fake branch if detached HEAD (release only)
-        if: github.event_name == 'release'
-        run: git symbolic-ref HEAD refs/heads/main
 
       - name: Publish to NPM
         run: pnpm publish --access public
