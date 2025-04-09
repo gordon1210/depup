@@ -10,28 +10,31 @@ import { usePackageData } from "./hooks/usePackageData.js";
 const VISIBLE_ROWS = 20;
 
 const App = () => {
-  const { packages, loading, updatePackages, updateDependencies } = usePackageData();
+  const { packages, loading, updatePackages, updateDependencies } =
+    usePackageData();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [packagesToUpdate, setPackagesToUpdate] = useState<typeof packages>([]);
-  const { 
-    cursor, 
-    setCursor, 
-    grouped, 
-    currentGroup, 
+  const {
+    cursor,
+    setCursor,
+    grouped,
+    currentGroup,
     handleTabChange,
     toggleSelection,
     changeVersionType,
     equalizeVersions,
     areVersionsEqual,
-    checkDivergingVersions
+    checkDivergingVersions,
   } = usePackageController(packages);
-  
+
   const { exit } = useApp();
 
   useInput((input, key) => {
-    if (isUpdating) return; // Prevent input handling during updates
-    
+    if (isUpdating) {
+      return;
+    } // Prevent input handling during updates
+
     if (input.toLowerCase() === "w" && !isConfirming) {
       handleTabChange("prev");
     } else if (input.toLowerCase() === "s" && !isConfirming) {
@@ -86,20 +89,27 @@ const App = () => {
   }
   if (isConfirming) {
     // Group packages by directory for a cleaner confirmation view
-    const packagesByDir = packagesToUpdate.reduce((acc, pkg) => {
-      const dir = path.relative(process.cwd(), pkg.packagePath) || ".";
-      if (!acc[dir]) acc[dir] = [];
-      acc[dir].push(pkg);
-      return acc;
-    }, {} as Record<string, typeof packagesToUpdate>);
-    
+    const packagesByDir = packagesToUpdate.reduce(
+      (acc, pkg) => {
+        const dir = path.relative(process.cwd(), pkg.packagePath) || ".";
+        if (!acc[dir]) {
+          acc[dir] = [];
+        }
+        acc[dir].push(pkg);
+        return acc;
+      },
+      {} as Record<string, typeof packagesToUpdate>,
+    );
+
     return (
       <Box flexDirection="column">
         <Text bold>The following dependencies will be updated:</Text>
-        
+
         {Object.entries(packagesByDir).map(([dir, pkgs]) => (
           <Box key={dir} flexDirection="column" marginTop={1}>
-            <Text bold underline>{dir}/package.json</Text>
+            <Text bold underline>
+              {dir}/package.json
+            </Text>
             {pkgs.map((pkg) => (
               <Text key={`${dir}-${pkg.name}`}>
                 • {pkg.name}: {pkg.currentVersion} → {pkg.displayVersion}
@@ -107,23 +117,26 @@ const App = () => {
             ))}
           </Box>
         ))}
-        
-        <Text marginTop={1}>
-          This will update package.json files and run a single 'pnpm install' at the end.
-        </Text>
-        <Text bold marginTop={1}>Press Enter to confirm or q to cancel</Text>
+
+        <Box marginTop={1}>
+          <Text>
+            This will update package.json files and run a single -pnpm install-
+            at the end.
+          </Text>
+        </Box>
+
+        <Box marginTop={1}>
+          <Text bold>Press Enter to confirm or q to cancel</Text>
+        </Box>
       </Box>
     );
   }
 
   return (
     <Box flexDirection="row">
-      <SideNav 
-        groups={grouped} 
-        activeTab={grouped.indexOf(currentGroup)} 
-      />
-      
-      <PackageList 
+      <SideNav groups={grouped} activeTab={grouped.indexOf(currentGroup)} />
+
+      <PackageList
         packages={currentGroup.packages}
         cursor={cursor}
         visibleCount={VISIBLE_ROWS}
