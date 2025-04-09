@@ -1,6 +1,6 @@
 {
   "name": "@gordon1210/depup",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "a dependency upgrade tool for node projects",
   "keywords": ["dependency", "upgrade", "npm", "package", "update", "manager"],
   "license": "MIT",

@@ -114,11 +114,20 @@ export function usePackageData() {
       const displayVersion = getDisplayVersion(pkg);
       const installVersion = getInstallVersion(pkg);
 
+      // Skip if we don't have a valid display version
+      if (!displayVersion) {
+        console.warn(
+          `Skipping ${pkg.name}: Unable to determine display version.`,
+        );
+        continue;
+      }
+
+      // Skip if we don't have a valid installation version
       if (!installVersion) {
         console.warn(
           `Skipping ${pkg.name}: Unable to determine installation version.`,
         );
-        continue; // Skip this package if we don't have a valid version
+        continue;
       }
 
       // Skip if current version is the same as target version
