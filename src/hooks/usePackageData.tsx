@@ -112,7 +112,6 @@ export function usePackageData() {
     for (const pkg of toUpdate) {
       const relPath = path.relative(process.cwd(), pkg.packagePath);
       const displayVersion = getDisplayVersion(pkg);
-      const installVersion = getInstallVersion(pkg);
 
       // Skip if we don't have a valid display version
       if (!displayVersion) {
@@ -121,6 +120,8 @@ export function usePackageData() {
         );
         continue;
       }
+
+      const installVersion = getInstallVersion(pkg);
 
       // Skip if we don't have a valid installation version
       if (!installVersion) {
