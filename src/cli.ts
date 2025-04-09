@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-import './dep-updater-cli.js';
+import "./dep-updater-cli.js";

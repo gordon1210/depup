@@ -1,14 +1,14 @@
-import { execSync } from 'child_process';
-import fs from 'fs/promises';
-import { globby } from 'globby';
-import pLimit from 'p-limit';
-import packageJson from 'package-json';
-import path from 'path';
-import { useEffect, useState } from 'react';
-import semver from 'semver';
+import { execSync } from "child_process";
+import fs from "fs/promises";
+import { globby } from "globby";
+import pLimit from "p-limit";
+import packageJson from "package-json";
+import path from "path";
+import { useEffect, useState } from "react";
+import semver from "semver";
 
-import type { PackageInfo } from '../types.js';
-import { detectWorkspaces, getDisplayVersion } from '../utils.js';
+import type { PackageInfo } from "../types.js";
+import { detectWorkspaces, getDisplayVersion } from "../utils.js";
 
 export function usePackageData() {
   const [packages, setPackages] = useState<PackageInfo[]>([]);
@@ -24,9 +24,9 @@ export function usePackageData() {
           workspaces.length > 0
             ? await globby(
                 workspaces.map((ws) => `${ws}/package.json`),
-                { cwd: root, absolute: true }
+                { cwd: root, absolute: true },
               )
-            : [path.join(root, 'package.json')];
+            : [path.join(root, "package.json")];
 
         const pkgs: PackageInfo[] = [];
         // Create a concurrency limit with a lower number to prevent rate limiting
@@ -45,7 +45,7 @@ export function usePackageData() {
         setPackages(pkgs);
         setLoading(false);
       } catch (error) {
-        console.error('Error scanning dependencies:', error);
+        console.error("Error scanning dependencies:", error);
         setError(error as Error);
         setLoading(false);
       }
@@ -67,41 +67,44 @@ export function usePackageData() {
   const getInstallVersion = (pkg: PackageInfo): string | undefined => {
     // First try the selected version type
     let version: string | undefined;
-    
-    switch(pkg.targetVersionType) {
-      case 'patch':
+
+    switch (pkg.targetVersionType) {
+      case "patch":
         version = pkg.patchVersion;
         break;
-      case 'minor':
+      case "minor":
         version = pkg.minorVersion;
         break;
-      case 'latest':
-        version = !semver.prerelease(pkg.latestVersion) 
-          ? pkg.latestVersion 
+      case "latest":
+        version = !semver.prerelease(pkg.latestVersion)
+          ? pkg.latestVersion
           : undefined;
         break;
-      case 'prerelease':
+      case "prerelease":
         version = pkg.prereleaseVersion;
         break;
     }
-    
+
     // If the selected version type doesn't have a value, implement a fallback strategy
     if (!version) {
       // Try in order: patch -> minor -> latest -> prerelease
-      version = pkg.patchVersion || 
-                pkg.minorVersion || 
-                (!semver.prerelease(pkg.latestVersion) ? pkg.latestVersion : undefined) || 
-                pkg.prereleaseVersion;
-      
+      version =
+        pkg.patchVersion ||
+        pkg.minorVersion ||
+        (!semver.prerelease(pkg.latestVersion)
+          ? pkg.latestVersion
+          : undefined) ||
+        pkg.prereleaseVersion;
+
       // If we found a fallback version, log it
       if (version) {
         console.warn(
           `No ${pkg.targetVersionType} version available for ${pkg.name}. ` +
-          `Falling back to ${version}.`
+            `Falling back to ${version}.`,
         );
       }
     }
-    
+
     return version;
   };
 
@@ -110,21 +113,37 @@ export function usePackageData() {
       const relPath = path.relative(process.cwd(), pkg.packagePath);
       const displayVersion = getDisplayVersion(pkg);
       const installVersion = getInstallVersion(pkg);
-      
+
       if (!installVersion) {
         console.warn(
-          `Skipping ${pkg.name}: Unable to determine installation version.`
+          `Skipping ${pkg.name}: Unable to determine installation version.`,
         );
         continue; // Skip this package if we don't have a valid version
       }
-      
+
+      // Skip if current version is the same as target version
+      const currentSemver =
+        semver.valid(semver.coerce(pkg.currentVersion)) || pkg.currentVersion;
+      const targetSemver =
+        semver.valid(semver.coerce(installVersion)) || installVersion;
+
+      if (
+        currentSemver === targetSemver ||
+        semver.eq(currentSemver, targetSemver)
+      ) {
+        console.log(
+          `\nSkipping ${pkg.name} in ${relPath || "."}: Already at version ${currentSemver}`,
+        );
+        continue;
+      }
+
       console.log(
-        `\nUpdating ${pkg.name} in ${relPath || '.'} to ${displayVersion}`
+        `\nUpdating ${pkg.name} in ${relPath || "."} to ${displayVersion}`,
       );
-      
+
       execSync(
-        `pnpm --filter ./${relPath || '.'} add ${pkg.name}@${installVersion}`,
-        { stdio: 'inherit' }
+        `pnpm --filter ./${relPath || "."} add ${pkg.name}@${installVersion}`,
+        { stdio: "inherit" },
       );
     }
   };
@@ -135,18 +154,18 @@ export function usePackageData() {
 async function processPackageJson(
   pkgPath: string,
   pkgs: PackageInfo[],
-  limit: ReturnType<typeof pLimit>
+  limit: ReturnType<typeof pLimit>,
 ): Promise<void> {
   try {
-    const content = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
+    const content = JSON.parse(await fs.readFile(pkgPath, "utf8"));
     const deps = Object.assign(
       {},
       content.dependencies,
-      content.devDependencies
+      content.devDependencies,
     );
 
     const depTasks = Object.entries(deps).map(([dep, version]) =>
-      processDependency(dep, version as string, pkgPath, pkgs, limit)
+      processDependency(dep, version as string, pkgPath, pkgs, limit),
     );
 
     // Process dependencies in batches to avoid overwhelming the Promise queue
@@ -164,7 +183,7 @@ async function processDependency(
   version: string,
   pkgPath: string,
   pkgs: PackageInfo[],
-  limit: ReturnType<typeof pLimit>
+  limit: ReturnType<typeof pLimit>,
 ): Promise<void> {
   try {
     const current = semver.minVersion(version);
@@ -173,7 +192,7 @@ async function processDependency(
     }
 
     const pkgMeta = await limit(() =>
-      packageJson(dep, { allVersions: true }).catch(() => null)
+      packageJson(dep, { allVersions: true }).catch(() => null),
     );
 
     if (!pkgMeta) {
@@ -191,11 +210,11 @@ async function processDependency(
     let minor: string | undefined;
 
     for (const v of stableVersions) {
-      if (!patch && semver.diff(current, v) === 'patch') {
+      if (!patch && semver.diff(current, v) === "patch") {
         patch = v;
         continue;
       }
-      if (!minor && semver.diff(current, v) === 'minor') {
+      if (!minor && semver.diff(current, v) === "minor") {
         minor = v;
         continue;
       }
@@ -207,20 +226,21 @@ async function processDependency(
       return;
     }
 
-    const displayVersion = getDisplayVersion({
-      name: dep,
-      currentVersion: version,
-      latestVersion: latest!,
-      patchVersion: patch,
-      minorVersion: minor || patch,
-      displayVersion: '',
-      packagePath: '',
-      packageJsonPath: '',
-      selected: false,
-      disabled: false,
-      targetVersionType: 'patch',
-      prereleaseVersion: prerelease,
-    }) || version;
+    const displayVersion =
+      getDisplayVersion({
+        name: dep,
+        currentVersion: version,
+        latestVersion: latest!,
+        patchVersion: patch,
+        minorVersion: minor || patch,
+        displayVersion: "",
+        packagePath: "",
+        packageJsonPath: "",
+        selected: false,
+        disabled: false,
+        targetVersionType: "patch",
+        prereleaseVersion: prerelease,
+      }) || version;
 
     pkgs.push({
       name: dep,
@@ -233,16 +253,14 @@ async function processDependency(
       packageJsonPath: pkgPath,
       selected: false,
       disabled: false,
-      targetVersionType: 'patch',
+      targetVersionType: "patch",
       prereleaseVersion: prerelease,
-      lastTargetVersionType: 'patch',
+      lastTargetVersionType: "patch",
     });
   } catch (error) {
     // Skip this dependency if there's an error
     // no console.error when error is "TypeError: Invalid comparator: workspace"
-    if (
-      (error as Error).message.includes('Invalid comparator: workspace')
-    ) {
+    if ((error as Error).message.includes("Invalid comparator: workspace")) {
       return;
     }
     console.error(`Error processing ${dep}:`, error);

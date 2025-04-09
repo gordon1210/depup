@@ -10,7 +10,7 @@ export interface PackageInfo {
   packageJsonPath: string;
   selected: boolean;
   disabled: boolean;
-  targetVersionType: 'latest' | 'minor' | 'patch' | 'prerelease';
+  targetVersionType: "latest" | "minor" | "patch" | "prerelease";
   lastTargetVersionType?: string;
 }
 
