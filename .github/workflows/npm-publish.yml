@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version increment (patch, minor, major) or specific version'
+        description: 'Version increment (patch, minor, major)'
         required: true
         default: 'patch'
         type: choice
@@ -18,8 +18,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -43,24 +45,24 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          pnpm version ${{ github.event.inputs.version }} --no-git-tag-version
-          git add package.json package-lock.json pnpm-lock.yaml || true
-          git commit -m "Bump version to $(node -p "require('./package.json').version") [skip ci]"
-          git tag v$(node -p "require('./package.json').version")
+          pnpm version ${{ github.event.inputs.version }}
           git push origin HEAD:main
           git push origin --tags
 
-      - name: Build
+      - name: Build project
         run: pnpm build
+
+      - name: Final Git cleanup to satisfy pnpm
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff-index --quiet HEAD || git commit -m "Final cleanup before publish [skip ci]"
+          git push
 
       - name: Fake branch if detached HEAD (release only)
         if: github.event_name == 'release'
         run: git symbolic-ref HEAD refs/heads/main
-
-      # - name: Git status debug
-      #   run: |
-      #     git status
-      #     git diff
 
       - name: Publish to NPM
         run: pnpm publish --access public
