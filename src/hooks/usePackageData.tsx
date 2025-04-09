@@ -190,13 +190,27 @@ export function usePackageData() {
             `\nUpdating ${change.name} in ${relPath || "."} to ${change.displayVersion}`,
           );
 
-          // Update in dependencies or devDependencies as appropriate
+          // Update in dependencies or devDependencies as appropriate, preserving prefix
           if (packageJsonContent.dependencies?.[change.name]) {
-            packageJsonContent.dependencies[change.name] = change.newVersion;
+            // Get the original version string to preserve prefix
+            const originalVersion = packageJsonContent.dependencies[change.name];
+            // Extract the prefix properly - handles ^, ~, >=, <=, >, <, =, etc.
+            const versionNumber = semver.valid(semver.coerce(originalVersion)) || "";
+            const prefix = versionNumber ? originalVersion.substring(0, originalVersion.indexOf(versionNumber)) : "";
+            
+            // Apply the same prefix to the new version
+            packageJsonContent.dependencies[change.name] = `${prefix}${change.newVersion}`;
             didModify = true;
           }
           if (packageJsonContent.devDependencies?.[change.name]) {
-            packageJsonContent.devDependencies[change.name] = change.newVersion;
+            // Get the original version string to preserve prefix
+            const originalVersion = packageJsonContent.devDependencies[change.name];
+            // Extract the prefix properly - handles ^, ~, >=, <=, >, <, =, etc.
+            const versionNumber = semver.valid(semver.coerce(originalVersion)) || "";
+            const prefix = versionNumber ? originalVersion.substring(0, originalVersion.indexOf(versionNumber)) : "";
+            
+            // Apply the same prefix to the new version
+            packageJsonContent.devDependencies[change.name] = `${prefix}${change.newVersion}`;
             didModify = true;
           }
         }
