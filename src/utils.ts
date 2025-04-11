@@ -66,3 +66,16 @@ export function progressBar(
     `▐ ${current}/${total}`
   );
 }
+
+export function truncateText(text: string, maxLength: number, ellipsisPosition: 'end' = 'end'): string {
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  if (ellipsisPosition === 'end') {
+    return text.slice(0, maxLength - 3) + '...';
+  }
+  
+  // Add other truncation styles if needed in the future
+  return text.slice(0, maxLength - 3) + '...';
+}

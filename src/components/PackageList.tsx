@@ -11,6 +11,7 @@ interface PackageListProps {
   visibleCount: number;
   checkDivergingVersions: (name: string) => boolean;
   areVersionsEqual: (pkg: PackageInfo) => boolean;
+  hasHigherUpdates: (pkg: PackageInfo) => boolean;
 }
 
 export function PackageList({
@@ -19,6 +20,7 @@ export function PackageList({
   visibleCount,
   checkDivergingVersions,
   areVersionsEqual,
+  hasHigherUpdates,
 }: PackageListProps) {
   const start = Math.min(
     Math.max(0, cursor - Math.floor(visibleCount / 2)),
@@ -49,9 +51,6 @@ export function PackageList({
 
       {visible.map((pkg, i) => {
         const absoluteIndex = start + i;
-        const strategyChanged =
-          pkg.lastTargetVersionType &&
-          pkg.lastTargetVersionType !== pkg.targetVersionType;
         const unchanged = areVersionsEqual(pkg);
         const isDiverging = checkDivergingVersions(pkg.name);
 
@@ -62,7 +61,7 @@ export function PackageList({
             isSelected={absoluteIndex === cursor}
             isDiverging={isDiverging}
             isVersionUnchanged={unchanged}
-            hasStrategyChanged={Boolean(strategyChanged)}
+            hasHigherUpdates={hasHigherUpdates(pkg)}
           />
         );
       })}

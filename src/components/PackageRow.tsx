@@ -3,13 +3,15 @@ import path from "path";
 import React from "react";
 
 import type { PackageInfo } from "../types.js";
+import { truncateText } from "../utils.js";
+import { ScrollingText } from "./ScrollingText.js";
 
 interface PackageRowProps {
   pkg: PackageInfo;
   isSelected: boolean;
   isDiverging: boolean;
   isVersionUnchanged: boolean;
-  hasStrategyChanged: boolean;
+  hasHigherUpdates: boolean;
 }
 
 export function PackageRow({
@@ -17,7 +19,7 @@ export function PackageRow({
   isSelected,
   isDiverging,
   isVersionUnchanged,
-  hasStrategyChanged,
+  hasHigherUpdates,
 }: PackageRowProps) {
   // Use inverse for better visibility instead of background color
   return (
@@ -30,10 +32,21 @@ export function PackageRow({
       <Box width={32}>
         <Text 
           bold={isSelected || pkg.selected} 
-          color={pkg.selected ? "green" : undefined} 
+          color={pkg.selected ? "green" : "yellow"} 
           inverse={isSelected}
         >
-          {pkg.name}
+          {isSelected ? (
+            <ScrollingText 
+              text={pkg.name}
+              maxLength={30} // Slightly less than column width for safety
+              isActive={isSelected}
+              bold={isSelected || pkg.selected}
+              color={pkg.selected ? "green" : "yellow"}
+              inverse={isSelected}
+            />
+          ) : (
+            pkg.name
+          )}
         </Text>
       </Box>
       <Box width={14}>
@@ -53,10 +66,11 @@ export function PackageRow({
         >
           {pkg.displayVersion}
         </Text>
+        {hasHigherUpdates && <Text color="cyan"> *</Text>}
       </Box>
       <Box width={12}>
         <Text 
-          color={hasStrategyChanged ? "magentaBright" : "yellow"} 
+          color={"magentaBright"} 
           inverse={isSelected}
           bold={isSelected}
         >
@@ -65,7 +79,14 @@ export function PackageRow({
       </Box>
       <Box flexGrow={1}>
         <Text color={isSelected ? undefined : "gray"} inverse={isSelected}>
-          {path.relative(process.cwd(), pkg.packagePath) || "."}
+          <ScrollingText 
+            text={path.relative(process.cwd(), pkg.packagePath) || "."}
+            maxLength={24}
+            isActive={true} // Always active for paths
+            color={isSelected ? undefined : "gray"}
+            inverse={isSelected}
+            interval={5000} // Longer interval for paths to reduce distraction
+          />
         </Text>
       </Box>
     </Box>

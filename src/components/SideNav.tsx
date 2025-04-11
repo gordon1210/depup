@@ -4,6 +4,8 @@ import path from "path";
 import React, { Fragment, useEffect, useState } from "react";
 
 import type { PackageGroup } from "../types.js";
+import { truncateText } from "../utils.js";
+import { ScrollingText } from "./ScrollingText.js";
 
 const TARGET_HEIGHT = 26;
 
@@ -81,7 +83,17 @@ export function SideNav({
             color={actualIndex === activeTab ? "green" : undefined}
             bold={actualIndex === activeTab}
           >
-            {path.basename(group.path)}
+            {actualIndex === activeTab ? (
+              <ScrollingText 
+                text={path.basename(group.path)}
+                maxLength={13}
+                isActive={actualIndex === activeTab}
+                color={actualIndex === activeTab ? "green" : undefined}
+                bold={actualIndex === activeTab}
+              />
+            ) : (
+              truncateText(path.basename(group.path), 13)
+            )}
             {selected > 0 ? ` (${selected})` : "    "}
           </Text>
         );

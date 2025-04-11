@@ -26,9 +26,11 @@ const App = () => {
     handleTabChange,
     toggleSelection,
     changeVersionType,
+    changeGlobalVersionType,
     equalizeVersions,
     areVersionsEqual,
     checkDivergingVersions,
+    hasHigherUpdates,
   } = usePackageController(packages);
 
   const { exit } = useApp();
@@ -44,6 +46,9 @@ const App = () => {
       handleTabChange("next");
     } else if (input.toLowerCase() === "e" && !isConfirming) {
       updatePackages(equalizeVersions());
+    } else if (input.toLowerCase() === "r" && !isConfirming) {
+      // Add handler for global strategy change
+      updatePackages(changeGlobalVersionType("next"));
     } else if (key.downArrow && !isConfirming) {
       setCursor((prev) => Math.min(prev + 1, currentGroup.packages.length - 1));
     } else if (key.upArrow && !isConfirming) {
@@ -135,8 +140,7 @@ const App = () => {
   return (
     <Box flexDirection="column">
       <Text bold>
-        📦 Select packages to update (⬆⬇ + Space, ⏎ confirm, q quit, ←→
-        Version, W/S pkg, E equalize)
+        📦 Select packages to update (⬆⬇ + Space, ⏎ confirm, q quit, ←→ Version, W/S pkg, E equalize, R rotate strategy)
       </Text>
       <Box flexDirection="row">
         <SideNav
@@ -152,6 +156,7 @@ const App = () => {
           visibleCount={VISIBLE_ROWS}
           checkDivergingVersions={checkDivergingVersions}
           areVersionsEqual={areVersionsEqual}
+          hasHigherUpdates={hasHigherUpdates}
         />
       </Box>
     </Box>
