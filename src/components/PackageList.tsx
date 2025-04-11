@@ -1,5 +1,4 @@
 import { Box, Text } from "ink";
-import path from "path";
 import React from "react";
 
 import type { PackageInfo } from "../types.js";
@@ -10,7 +9,6 @@ interface PackageListProps {
   packages: PackageInfo[];
   cursor: number;
   visibleCount: number;
-  packagePath: string;
   checkDivergingVersions: (name: string) => boolean;
   areVersionsEqual: (pkg: PackageInfo) => boolean;
 }
@@ -19,7 +17,6 @@ export function PackageList({
   packages,
   cursor,
   visibleCount,
-  packagePath,
   checkDivergingVersions,
   areVersionsEqual,
 }: PackageListProps) {

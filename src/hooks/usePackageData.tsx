@@ -28,13 +28,13 @@ export function usePackageData() {
               )
             : [path.join(root, "package.json")];
 
-        const pkgs: PackageInfo[] = [];
+        // const pkgs: PackageInfo[] = [];
         // Create a concurrency limit with a lower number to prevent rate limiting
         const limit = pLimit(5);
         const tasks: Promise<void>[] = [];
 
         for (const pkgPath of packageJsonPaths) {
-          tasks.push(processPackageJson(pkgPath, pkgs, limit));
+          tasks.push(processPackageJson(pkgPath, setPackages, limit));
         }
 
         // Process package.json files sequentially to avoid race conditions
@@ -42,7 +42,7 @@ export function usePackageData() {
           await Promise.all(tasks.slice(i, i + 3));
         }
 
-        setPackages(pkgs);
+        //setPackages(pkgs);
         setLoading(false);
       } catch (error) {
         console.error("Error scanning dependencies:", error);
@@ -239,7 +239,7 @@ export function usePackageData() {
 
 async function processPackageJson(
   pkgPath: string,
-  pkgs: PackageInfo[],
+  setPackages: React.Dispatch<React.SetStateAction<PackageInfo[]>>,
   limit: ReturnType<typeof pLimit>,
 ): Promise<void> {
   try {
@@ -251,7 +251,7 @@ async function processPackageJson(
     );
 
     const depTasks = Object.entries(deps).map(([dep, version]) =>
-      processDependency(dep, version as string, pkgPath, pkgs, limit),
+      processDependency(dep, version as string, pkgPath, setPackages, limit),
     );
 
     // Process dependencies in batches to avoid overwhelming the Promise queue
@@ -268,7 +268,7 @@ async function processDependency(
   dep: string,
   version: string,
   pkgPath: string,
-  pkgs: PackageInfo[],
+  setPackages: React.Dispatch<React.SetStateAction<PackageInfo[]>>,
   limit: ReturnType<typeof pLimit>,
 ): Promise<void> {
   try {
@@ -328,21 +328,60 @@ async function processDependency(
         prereleaseVersion: prerelease,
       }) || version;
 
-    pkgs.push({
-      name: dep,
-      currentVersion: version,
-      latestVersion: latest!,
-      patchVersion: patch,
-      minorVersion: minor || patch,
-      displayVersion,
-      packagePath: path.dirname(pkgPath),
-      packageJsonPath: pkgPath,
-      selected: false,
-      disabled: false,
-      targetVersionType: "patch",
-      prereleaseVersion: prerelease,
-      lastTargetVersionType: "patch",
-    });
+      setPackages((prev) => {
+        const updated = [...prev];
+        const index = updated.findIndex(
+          (p) => p.name === dep && p.packagePath === path.dirname(pkgPath),
+        );
+
+        if (index !== -1) {
+          updated[index] = {
+            ...updated[index],
+            latestVersion: latest!,
+            patchVersion: patch,
+            minorVersion: minor || patch,
+            displayVersion,
+            targetVersionType: "patch",
+            lastTargetVersionType: "patch",
+          };
+          return updated;
+        }
+
+        return [
+          ...updated,
+          {
+            name: dep,
+            currentVersion: version,
+            latestVersion: latest!,
+            patchVersion: patch,
+            minorVersion: minor || patch,
+            displayVersion,
+            packagePath: path.dirname(pkgPath),
+            packageJsonPath: pkgPath,
+            selected: false,
+            disabled: false,
+            targetVersionType: "patch",
+            prereleaseVersion: prerelease,
+            lastTargetVersionType: "patch",
+          },
+        ];
+      }
+    );
+    // pkgs.push({
+    //   name: dep,
+    //   currentVersion: version,
+    //   latestVersion: latest!,
+    //   patchVersion: patch,
+    //   minorVersion: minor || patch,
+    //   displayVersion,
+    //   packagePath: path.dirname(pkgPath),
+    //   packageJsonPath: pkgPath,
+    //   selected: false,
+    //   disabled: false,
+    //   targetVersionType: "patch",
+    //   prereleaseVersion: prerelease,
+    //   lastTargetVersionType: "patch",
+    // });
   } catch (error) {
     // Skip this dependency if there's an error
     // no console.error when error is "TypeError: Invalid comparator: workspace"

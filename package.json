@@ -2,7 +2,14 @@
   "name": "@gordon1210/depup",
   "version": "0.1.16",
   "description": "a dependency upgrade tool for node projects",
-  "keywords": ["dependency", "upgrade", "npm", "package", "update", "manager"],
+  "keywords": [
+    "dependency",
+    "upgrade",
+    "npm",
+    "package",
+    "update",
+    "manager"
+  ],
   "license": "MIT",
   "author": "gordon1210",
   "repository": {
@@ -38,6 +45,7 @@
   "dependencies": {
     "globby": "^14.1.0",
     "ink": "^5.2.0",
+    "ink-spinner": "^5.0.0",
     "p-limit": "^6.2.0",
     "package-json": "^10.0.1",
     "react": "^18.3.1",

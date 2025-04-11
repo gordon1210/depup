@@ -78,9 +78,6 @@ const App = () => {
     }
   });
 
-  if (loading) {
-    return <Text>🔍 Scanning dependencies...</Text>;
-  }
   if (packages.length === 0) {
     return <Text>✅ No dependencies found.</Text>;
   }
@@ -135,17 +132,15 @@ const App = () => {
   return (
     <Box flexDirection="column">
       <Text bold>
-        📦 Select packages to update (⬆⬇ + Space, ⏎ confirm, q quit, ←→
-        Version, W/S tabs, E equalize)
+        📦 Select packages to update (⬆⬇ + Space, ⏎ confirm, q quit, ←→ Version, W/S pkg, E equalize)
       </Text>
       <Box flexDirection="row">
-        <SideNav groups={grouped} activeTab={grouped.indexOf(currentGroup)} visibleCount={VISIBLE_ROWS} />
+        <SideNav groups={grouped} activeTab={grouped.indexOf(currentGroup)} visibleCount={VISIBLE_ROWS} loading={loading} />
 
         <PackageList
           packages={currentGroup.packages}
           cursor={cursor}
           visibleCount={VISIBLE_ROWS}
-          packagePath={currentGroup.path}
           checkDivergingVersions={checkDivergingVersions}
           areVersionsEqual={areVersionsEqual}
         />
