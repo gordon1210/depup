@@ -31,11 +31,6 @@ export function PackageList({
 
   return (
     <Box flexDirection="column">
-      <Text bold>
-        📦 Select packages to update (⬆⬇ + Space, ⏎ confirm, q quit, ←→
-        Version, W/S tabs, E equalize):{" "}
-        {path.relative(process.cwd(), packagePath)}
-      </Text>
       <Box flexDirection="row">
         <Box width={3}></Box>
         <Box width={32}>
