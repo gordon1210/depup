@@ -1,0 +1,16 @@
+{
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+    "features": {
+        "ghcr.io/devcontainers-extra/features/pnpm:2": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "Prisma.prisma",
+                "Vercel.turbo-vsc",
+                "cweijan.dbclient-jdbc",
+                "cweijan.vscode-redis-client"
+            ]
+        }
+    }
+}
