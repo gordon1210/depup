@@ -1,6 +1,6 @@
 {
   "name": "@gordon1210/depup",
-  "version": "0.1.16",
+  "version": "0.2.0",
   "description": "a dependency upgrade tool for node projects",
   "keywords": [
     "dependency",
@@ -40,7 +40,8 @@
     "lint": "eslint ./src --ext .ts,.tsx",
     "start": "node dist/cli.js",
     "prepublishOnly": "pnpm build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified... moep moep\" && exit 1",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "globby": "^14.1.0",

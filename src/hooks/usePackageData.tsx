@@ -193,24 +193,40 @@ export function usePackageData() {
           // Update in dependencies or devDependencies as appropriate, preserving prefix
           if (packageJsonContent.dependencies?.[change.name]) {
             // Get the original version string to preserve prefix
-            const originalVersion = packageJsonContent.dependencies[change.name];
+            const originalVersion =
+              packageJsonContent.dependencies[change.name];
             // Extract the prefix properly - handles ^, ~, >=, <=, >, <, =, etc.
-            const versionNumber = semver.valid(semver.coerce(originalVersion)) || "";
-            const prefix = versionNumber ? originalVersion.substring(0, originalVersion.indexOf(versionNumber)) : "";
-            
+            const versionNumber =
+              semver.valid(semver.coerce(originalVersion)) || "";
+            const prefix = versionNumber
+              ? originalVersion.substring(
+                  0,
+                  originalVersion.indexOf(versionNumber),
+                )
+              : "";
+
             // Apply the same prefix to the new version
-            packageJsonContent.dependencies[change.name] = `${prefix}${change.newVersion}`;
+            packageJsonContent.dependencies[change.name] =
+              `${prefix}${change.newVersion}`;
             didModify = true;
           }
           if (packageJsonContent.devDependencies?.[change.name]) {
             // Get the original version string to preserve prefix
-            const originalVersion = packageJsonContent.devDependencies[change.name];
+            const originalVersion =
+              packageJsonContent.devDependencies[change.name];
             // Extract the prefix properly - handles ^, ~, >=, <=, >, <, =, etc.
-            const versionNumber = semver.valid(semver.coerce(originalVersion)) || "";
-            const prefix = versionNumber ? originalVersion.substring(0, originalVersion.indexOf(versionNumber)) : "";
-            
+            const versionNumber =
+              semver.valid(semver.coerce(originalVersion)) || "";
+            const prefix = versionNumber
+              ? originalVersion.substring(
+                  0,
+                  originalVersion.indexOf(versionNumber),
+                )
+              : "";
+
             // Apply the same prefix to the new version
-            packageJsonContent.devDependencies[change.name] = `${prefix}${change.newVersion}`;
+            packageJsonContent.devDependencies[change.name] =
+              `${prefix}${change.newVersion}`;
             didModify = true;
           }
         }
@@ -328,45 +344,44 @@ async function processDependency(
         prereleaseVersion: prerelease,
       }) || version;
 
-      setPackages((prev) => {
-        const updated = [...prev];
-        const index = updated.findIndex(
-          (p) => p.name === dep && p.packagePath === path.dirname(pkgPath),
-        );
+    setPackages((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex(
+        (p) => p.name === dep && p.packagePath === path.dirname(pkgPath),
+      );
 
-        if (index !== -1) {
-          updated[index] = {
-            ...updated[index],
-            latestVersion: latest!,
-            patchVersion: patch,
-            minorVersion: minor || patch,
-            displayVersion,
-            targetVersionType: "patch",
-            lastTargetVersionType: "patch",
-          };
-          return updated;
-        }
-
-        return [
-          ...updated,
-          {
-            name: dep,
-            currentVersion: version,
-            latestVersion: latest!,
-            patchVersion: patch,
-            minorVersion: minor || patch,
-            displayVersion,
-            packagePath: path.dirname(pkgPath),
-            packageJsonPath: pkgPath,
-            selected: false,
-            disabled: false,
-            targetVersionType: "patch",
-            prereleaseVersion: prerelease,
-            lastTargetVersionType: "patch",
-          },
-        ];
+      if (index !== -1) {
+        updated[index] = {
+          ...updated[index],
+          latestVersion: latest!,
+          patchVersion: patch,
+          minorVersion: minor || patch,
+          displayVersion,
+          targetVersionType: "patch",
+          lastTargetVersionType: "patch",
+        };
+        return updated;
       }
-    );
+
+      return [
+        ...updated,
+        {
+          name: dep,
+          currentVersion: version,
+          latestVersion: latest!,
+          patchVersion: patch,
+          minorVersion: minor || patch,
+          displayVersion,
+          packagePath: path.dirname(pkgPath),
+          packageJsonPath: pkgPath,
+          selected: false,
+          disabled: false,
+          targetVersionType: "patch",
+          prereleaseVersion: prerelease,
+          lastTargetVersionType: "patch",
+        },
+      ];
+    });
     // pkgs.push({
     //   name: dep,
     //   currentVersion: version,

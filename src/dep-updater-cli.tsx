@@ -7,6 +7,9 @@ import { SideNav } from "./components/SideNav.js";
 import { usePackageController } from "./hooks/usePackageController.js";
 import { usePackageData } from "./hooks/usePackageData.js";
 
+// Clear the console when starting the app
+console.clear();
+
 const VISIBLE_ROWS = 20;
 
 const App = () => {
@@ -132,10 +135,16 @@ const App = () => {
   return (
     <Box flexDirection="column">
       <Text bold>
-        📦 Select packages to update (⬆⬇ + Space, ⏎ confirm, q quit, ←→ Version, W/S pkg, E equalize)
+        📦 Select packages to update (⬆⬇ + Space, ⏎ confirm, q quit, ←→
+        Version, W/S pkg, E equalize)
       </Text>
       <Box flexDirection="row">
-        <SideNav groups={grouped} activeTab={grouped.indexOf(currentGroup)} visibleCount={VISIBLE_ROWS} loading={loading} />
+        <SideNav
+          groups={grouped}
+          activeTab={grouped.indexOf(currentGroup)}
+          visibleCount={VISIBLE_ROWS}
+          loading={loading}
+        />
 
         <PackageList
           packages={currentGroup.packages}
