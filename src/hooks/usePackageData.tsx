@@ -10,6 +10,8 @@ import semver from "semver";
 import type { PackageInfo, PackageJsonUpdate } from "../types.js";
 import { detectWorkspaces, getDisplayVersion } from "../utils.js";
 
+const PACKAGE_BATCH_SIZE = 3
+
 export function usePackageData() {
   const [packages, setPackages] = useState<PackageInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +40,8 @@ export function usePackageData() {
         }
 
         // Process package.json files in small batches to avoid race conditions
-        for (let i = 0; i < tasks.length; i += 3) {
-          await Promise.all(tasks.slice(i, i + 3).map((task) => task()));
+        for (let i = 0; i < tasks.length; i += PACKAGE_BATCH_SIZE) {
+          await Promise.all(tasks.slice(i, i + PACKAGE_BATCH_SIZE).map((task) => task()));
         }
 
         //setPackages(pkgs);
